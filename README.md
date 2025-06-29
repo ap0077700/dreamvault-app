@@ -1,32 +1,20 @@
-# 🌙 DreamVault - AI-Powered Dream Journal
+# DreamVault - AI-Powered Dream Journal
 
-Record, analyze, and understand your dreams with artificial intelligence.
+A beautiful, responsive web app for recording and analyzing your dreams with AI insights.
 
-## ✨ Features
+## Features
+- Record dreams with mood tracking
+- AI-powered basic analysis
+- Dark/light mode
+- Dream streak tracking
+- Responsive design
+- PWA support
 
-- 📝 **Dream Recording**: Capture your dreams with detailed descriptions
-- 🧠 **AI Analysis**: Get psychological insights into your dreams
-- 📊 **Analytics**: Track patterns in your dream life
-- 🌟 **Lucid Dreams**: Mark and track lucid dreaming experiences
-- 🏷️ **Tags & Search**: Organize and find your dreams easily
-- 📱 **Mobile App**: Install as a PWA on your phone
+## Live Demo
+[View Live App](your-vercel-url-here)
 
-## 🚀 Live App
-
-Visit: [Your Live URL will be here]
-
-## 💰 Monetization
-
-- Freemium model with premium subscriptions
-- Ad revenue from free users
-- Premium features: Advanced AI analysis, unlimited storage, ad-free experience
-
-## 🛠️ Tech Stack
-
-- React (Frontend)
+## Tech Stack
+- HTML5
+- CSS3 (Tailwind)
+- JavaScript (React)
 - Progressive Web App (PWA)
-- Local Storage (Data persistence)
-- Tailwind CSS (Styling)
-- Vercel (Hosting)
-
-Built with ❤️ for dream enthusiasts
