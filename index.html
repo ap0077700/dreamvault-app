@@ -202,7 +202,7 @@
             const [currentPrompt, setCurrentPrompt] = useState('');
             const [notifications, setNotifications] = useState([]);
             const [waitlistEmail, setWaitlistEmail] = useState('');
-            const [waitlistCount, setWaitlistCount] = useState(1247);
+            const [waitlistCount, setWaitlistCount] = useState(0);
             const [isOnWaitlist, setIsOnWaitlist] = useState(false);
             
             const dreamPrompts = [
@@ -263,7 +263,13 @@
                 if (savedStreak) setDreamStreak(parseInt(savedStreak));
                 if (savedLastDate) setLastDreamDate(new Date(savedLastDate));
                 if (savedWaitlist === 'true') setIsOnWaitlist(true);
-                
+                // Load actual waitlist count
+                const savedCount = localStorage.getItem('dreamvault_waitlist_count');
+                if (savedCount) {
+                    setWaitlistCount(parseInt(savedCount));
+                } else {
+                    setWaitlistCount(0); // Start from 0 for actual count
+                }
                 // Set daily prompt
                 const today = new Date().getDate();
                 setCurrentPrompt(dreamPrompts[today % dreamPrompts.length]);
@@ -391,33 +397,38 @@
                 setCurrentView('add');
             };
             
-            const deleteDream = (id) => {
+                 const deleteDream = (id) => {
                 setDreams(dreams.filter(d => d.id !== id));
                 showNotification('Dream deleted', 'info');
             };
-            
+
             const joinWaitlist = () => {
                 if (!waitlistEmail || !waitlistEmail.includes('@')) {
                     showNotification('Please enter a valid email address', 'error');
                     return;
                 }
-                
+    
                 localStorage.setItem('dreamvault_waitlist', 'true');
                 localStorage.setItem('dreamvault_waitlist_email', waitlistEmail);
-                
+    
                 setIsOnWaitlist(true);
-                setWaitlistCount(prev => prev + 1);
+                const newCount = waitlistCount + 1;
+                setWaitlistCount(newCount);
+    
+                // Save the actual count
+                localStorage.setItem('dreamvault_waitlist_count', newCount.toString());
+    
                 setShowWaitlistModal(false);
-                
+    
                 showNotification('🎉 You\'re on the waitlist! We\'ll notify you when premium launches!', 'success');
             };
-            
+
             const filteredDreams = dreams.filter(dream =>
                 dream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 dream.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 (dream.tags && dream.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
             );
-            
+
             // Simple icons as text
             const MoonIcon = () => React.createElement('span', {}, '🌙');
             const PlusIcon = () => React.createElement('span', {}, '➕');
