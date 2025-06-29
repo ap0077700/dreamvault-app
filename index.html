@@ -1,954 +1,4 @@
-React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
-                                    React.createElement('option', { value: 'confused' }, '😕 Confused & Uncertain'),
-                                    React.createElement('option', { value: 'peaceful' }, '😌 Peaceful & Serene'),
-                                    React.createElement('option', { value: 'frightened' }, '😨 Frightened & Scared')
-                                )
-                            ),
-                            
-                            React.createElement('div', {},
-                                React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Dream Date'),
-                                React.createElement('input', {
-                                    type: 'date',
-                                    value: newDream.date,
-                                    onChange: (e) => setNewDream({...newDream, date: e.target.value}),
-                                    className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                                        isDarkMode 
-                                            ? 'bg-gray-700 border-gray-600 text-white' 
-                                            : 'bg-white border-gray-200 text-gray-900'
-                                    }`
-                                })
-                            )
-                        ),
-                        
-                        React.createElement('div', { className: 'flex items-center space-x-6' },
-                            React.createElement('label', { className: 'flex items-center space-x-3 cursor-pointer' },
-                                React.createElement('input', {
-                                    type: 'checkbox',
-                                    checked: newDream.lucid,
-                                    onChange: (e) => setNewDream({...newDream, lucid: e.target.checked}),
-                                    className: 'w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
-                                }),
-                                React.createElement('span', { className: `text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Lucid Dream'),
-                                React.createElement(Star, { className: 'w-4 h-4 text-yellow-500' })
-                            )
-                        ),
-                        
-                        React.createElement('div', {},
-                            React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Dream Tags'),
-                            React.createElement('input', {
-                                type: 'text',
-                                value: (newDream.tags || []).join(', '),
-                                onChange: (e) => setNewDream({...newDream, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t)}),
-                                placeholder: 'flying, water, family, work, adventure...',
-                                className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                                    isDarkMode 
-                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
-                                }`
-                            }),
-                            React.createElement('p', { className: `text-xs mt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 
-                                'Separate tags with commas. These help you find patterns in your dreams.'
-                            )
-                        ),
-                        
-                        React.createElement('div', { className: 'flex space-x-3 pt-4' },
-                            React.createElement('button', {
-                                onClick: addDream,
-                                disabled: isLoading || aiThinking || !newDream.title || !newDream.content,
-                                className: 'flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105'
-                            },
-                                isLoading || aiThinking ? 
-                                    React.createElement('span', { className: 'flex items-center justify-center space-x-2' },
-                                        React.createElement(Brain, { className: 'w-5 h-5 ai-typing' }),
-                                        React.createElement('span', {}, 'AI Analyzing Dream...')
-                                    ) :
-                                    (isEditing ? 'Update Dream' : 'Save & Analyze Dream')
-                            ),
-                            isEditing && React.createElement('button', {
-                                onClick: () => {
-                                    setIsEditing(false);
-                                    setEditingId(null);
-                                    setNewDream({
-                                        title: '',
-                                        content: '',
-                                        mood: 'neutral',
-                                        lucid: false,
-                                        tags: [],
-                                        date: new Date().toISOString().split('T')[0]
-                                    });
-                                    setCurrentView('journal');
-                                },
-                                className: `px-6 py-3 border rounded-lg transition-colors ${
-                                    isDarkMode 
-                                        ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
-                                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                                }`
-                            }, 'Cancel')
-                        )
-                    )
-                )
-            );
-
-            const renderTimeline = () => {
-                const sortedDreams = [...dreams].sort((a, b) => new Date(b.date) - new Date(a.date));
-                const dreamsByMonth = sortedDreams.reduce((acc, dream) => {
-                    const monthKey = new Date(dream.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
-                    if (!acc[monthKey]) acc[monthKey] = [];
-                    acc[monthKey].push(dream);
-                    return acc;
-                }, {});
-
-                return React.createElement('div', { className: 'space-y-6' },
-                    React.createElement('div', { className: 'flex items-center justify-between' },
-                        React.createElement('h2', { className: `text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Dream Timeline'),
-                        dreamStreak > 0 && React.createElement(StreakDisplay)
-                    ),
-                    
-                    // Premium feature preview
-                    React.createElement(PremiumFeaturePreview, {
-                        title: "Advanced Timeline Features",
-                        description: "See dream patterns, emotional trends, and lucid dream progression over time with interactive charts and insights.",
-                        comingSoon: true
-                    }),
-                    
-                    React.createElement('div', { className: 'space-y-8' },
-                        Object.entries(dreamsByMonth).map(([month, monthDreams]) =>
-                            React.createElement('div', { key: month, className: 'relative' },
-                                React.createElement('div', { className: `sticky top-4 z-10 inline-block px-4 py-2 rounded-full text-sm font-medium ${
-                                    isDarkMode ? 'bg-gray-800 text-gray-200 border border-gray-700' : 'bg-white text-gray-800 border border-gray-200'
-                                }` }, month),
-                                React.createElement('div', { className: 'mt-4 space-y-4' },
-                                    monthDreams.map((dream, index) =>
-                                        React.createElement('div', { 
-                                            key: dream.id, 
-                                            className: `timeline-dot flex space-x-4 ${index < monthDreams.length - 1 ? 'pb-4' : ''}` 
-                                        },
-                                            React.createElement('div', { className: 'flex flex-col items-center' },
-                                                React.createElement('div', { className: `w-3 h-3 rounded-full ${
-                                                    dream.lucid ? 'bg-yellow-500' : 'bg-blue-500'
-                                                }` }),
-                                                index < monthDreams.length - 1 && React.createElement('div', { className: `w-px h-8 mt-2 ${
-                                                    isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
-                                                }` })
-                                            ),
-                                            React.createElement('div', { className: 'flex-1 min-w-0' },
-                                                React.createElement('div', { 
-                                                    className: `p-4 rounded-lg border cursor-pointer hover:shadow-md transition-all ${
-                                                        isDarkMode 
-                                                            ? 'bg-gray-800 border-gray-700 hover:shadow-gray-900/25' 
-                                                            : 'bg-white border-gray-200'
-                                                    }`,
-                                                    onClick: () => {
-                                                        setCurrentView('journal');
-                                                        setSearchQuery(dream.title);
-                                                    }
-                                                },
-                                                    React.createElement('div', { className: 'flex items-center justify-between mb-2' },
-                                                        React.createElement('h3', { className: `font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, dream.title),
-                                                        React.createElement('div', { className: 'flex items-center space-x-2' },
-                                                            dream.lucid && React.createElement(Star, { className: 'w-4 h-4 text-yellow-500' })
-                                                        )
-                                                    ),
-                                                    React.createElement('p', { className: `text-sm mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, 
-                                                        dream.content.length > 100 ? `${dream.content.substring(0, 100)}...` : dream.content
-                                                    ),
-                                                    React.createElement('div', { className: 'flex items-center space-x-2' },
-                                                        React.createElement('span', { className: `text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 
-                                                            new Date(dream.date).toLocaleDateString()
-                                                        ),
-                                                        React.createElement('span', { 
-                                                            className: `px-2 py-1 text-xs rounded ${
-                                                                dream.mood === 'happy' ? 'bg-green-100 text-green-800' :
-                                                                dream.mood === 'anxious' ? 'bg-red-100 text-red-800' :
-                                                                'bg-gray-100 text-gray-800'
-                                                            }` 
-                                                        }, dream.mood)
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    
-                    dreams.length === 0 && React.createElement('div', { className: `text-center py-12 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` },
-                        React.createElement(Calendar, { className: `w-16 h-16 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-300'}` }),
-                        React.createElement('p', {}, 'No dreams in your timeline yet.'),
-                        React.createElement('p', { className: 'text-sm mt-2' }, 'Start recording your dreams to see patterns over time!')
-                    )
-                );
-            };
-
-            const renderAnalytics = () => {
-                const moodStats = dreams.reduce((acc, dream) => {
-                    acc[dream.mood] = (acc[dream.mood] || 0) + 1;
-                    return acc;
-                }, {});
-                
-                const tagStats = dreams.flatMap(d => d.tags || [])
-                    .reduce((acc, tag) => {
-                        acc[tag] = (acc[tag] || 0) + 1;
-                        return acc;
-                    }, {});
-                
-                const topTags = Object.entries(tagStats).sort(([,a], [,b]) => b - a).slice(0, 10);
-                
-                return React.createElement('div', { className: 'space-y-6' },
-                    React.createElement('div', { className: 'flex items-center justify-between' },
-                        React.createElement('div', { className: 'flex items-center space-x-4' },
-                            React.createElement('h2', { className: `text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Dream Analytics'),
-                            dreamStreak > 0 && React.createElement(StreakDisplay)
-                        ),
-                        React.createElement('button', {
-                            onClick: () => setShowWaitlistModal(true),
-                            className: 'flex items-center space-x-2 waitlist-glow text-white px-4 py-2 rounded-lg hover:scale-105 transition-all'
-                        },
-                            React.createElement(Crown, { className: 'w-4 h-4' }),
-                            React.createElement('span', {}, 'Join Waitlist for Premium Analytics')
-                        )
-                    ),
-                    
-                    // Basic metrics (free version)
-                    React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-4' },
-                        React.createElement('div', { className: `p-4 rounded-xl text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}` },
-                            React.createElement('div', { className: 'text-2xl font-bold text-blue-600' }, dreams.length),
-                            React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 'Total Dreams')
-                        ),
-                        React.createElement('div', { className: `p-4 rounded-xl text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}` },
-                            React.createElement('div', { className: 'text-2xl font-bold text-green-600' }, dreams.filter(d => d.lucid).length),
-                            React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 'Lucid Dreams')
-                        ),
-                        React.createElement('div', { className: `p-4 rounded-xl text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}` },
-                            React.createElement('div', { className: 'text-2xl font-bold text-purple-600' }, new Set(dreams.flatMap(d => d.tags || [])).size),
-                            React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 'Unique Themes')
-                        ),
-                        React.createElement('div', { className: `p-4 rounded-xl text-center ${isDarkMode ? 'bg-gray-800' : 'bg-white'} border ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}` },
-                            React.createElement('div', { className: 'text-2xl font-bold text-orange-600' }, dreamStreak),
-                            React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 'Day Streak')
-                        )
-                    ),
-                    
-                    React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' },
-                        // Basic mood distribution (free)
-                        React.createElement('div', { className: `p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
-                            React.createElement('h3', { className: `font-semibold mb-4 flex items-center ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}` },
-                                React.createElement(BarChart3, { className: 'w-5 h-5 mr-2 text-blue-600' }),
-                                'Basic Mood Tracking'
-                            ),
-                            React.createElement('div', { className: 'space-y-3' },
-                                Object.entries(moodStats).slice(0, 5).map(([mood, count]) => (
-                                    React.createElement('div', { key: mood, className: 'flex items-center justify-between' },
-                                        React.createElement('span', { className: `capitalize ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, mood),
-                                        React.createElement('div', { className: 'flex items-center space-x-2' },
-                                            React.createElement('div', { className: `w-16 h-2 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-200'}` },
-                                                React.createElement('div', {
-                                                    className: 'h-full rounded-full bg-blue-600 emotion-bar',
-                                                    style: { width: `${(count / dreams.length) * 100}%` }
-                                                })
-                                            ),
-                                            React.createElement('span', { className: `text-sm w-8 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, count)
-                                        )
-                                    )
-                                ))
-                            ),
-                            dreams.length > 0 && React.createElement('div', { className: 'mt-4 pt-4 border-t border-gray-200' },
-                                React.createElement('button', {
-                                    onClick: () => setShowWaitlistModal(true),
-                                    className: 'text-sm text-blue-600 hover:text-blue-700 font-medium'
-                                }, '🔮 Unlock Advanced Emotion Analysis →')
-                            )
-                        ),
-                        
-                        // Basic themes (free)
-                        React.createElement('div', { className: `p-6 rounded-xl border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
-                            React.createElement('h3', { className: `font-semibold mb-4 flex items-center ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}` },
-                                React.createElement(Timeline, { className: 'w-5 h-5 mr-2 text-green-600' }),
-                                'Basic Dream Themes'
-                            ),
-                            React.createElement('div', { className: 'space-y-3' },
-                                topTags.slice(0, 5).map(([tag, count]) =>
-                                    React.createElement('div', { key: tag, className: 'flex items-center justify-between' },
-                                        React.createElement('span', { className: `${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, `#${tag}`),
-                                        React.createElement('span', { 
-                                            className: `px-2 py-1 rounded-full text-sm ${
-                                                isDarkMode ? 'bg-purple-900 text-purple-300' : 'bg-purple-100 text-purple-800'
-                                            }` 
-                                        }, count)
-                                    )
-                                )
-                            ),
-                            topTags.length > 0 && React.createElement('div', { className: 'mt-4 pt-4 border-t border-gray-200' },
-                                React.createElement('button', {
-                                    onClick: () => setShowWaitlistModal(true),
-                                    className: 'text-sm text-blue-600 hover:text-blue-700 font-medium'
-                                }, '📊 Unlock Pattern Recognition & Archetypes →')
-                            )
-                        )
-                    ),
-                    
-                    // Premium features preview
-                    React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-6' },
-                        React.createElement(PremiumFeaturePreview, {
-                            title: "🧠 Advanced AI Dream Analysis",
-                            description: "Get detailed psychological insights, emotion scoring (1-10), and dream archetype identification for each dream.",
-                            comingSoon: true
-                        }),
-                        React.createElement(PremiumFeaturePreview, {
-                            title: "📈 Emotion Chart Analytics",
-                            description: "Visual emotion tracking with joy, anxiety, fear, wonder, and control metrics. See patterns over time.",
-                            comingSoon: true
-                        }),
-                        React.createElement(PremiumFeaturePreview, {
-                            title: "🎭 Dream Archetypes & Symbols",
-                            description: "Discover your inner archetypes (Explorer, Healer, Warrior) and decode dream symbols with AI analysis.",
-                            comingSoon: true
-                        }),
-                        React.createElement(PremiumFeaturePreview, {
-                            title: "📊 Export & Data Insights",
-                            description: "Export your dream data, get trend analysis, and receive personalized recommendations for better dreams.",
-                            comingSoon: true
-                        })
-                    ),
-                    
-                    // Big waitlist CTA
-                    React.createElement('div', { className: `border-2 border-dashed rounded-xl p-8 text-center ${isDarkMode ? 'border-purple-600 bg-purple-900/20' : 'border-purple-300 bg-purple-50'}` },
-                        React.createElement('div', { className: 'waitlist-glow w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center' },
-                            React.createElement(Crown, { className: 'w-10 h-10 text-white' })
-                        ),
-                        React.createElement('h3', { className: `text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Premium Analytics Coming Soon!'),
-                        React.createElement('p', { className: `text-lg mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, 
-                            'Join the waitlist to be first in line for advanced dream analytics, AI insights, and premium features!'
-                        ),
-                        React.createElement('div', { className: `flex items-center justify-center space-x-2 mb-6 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}` },
-                            React.createElement(Users, { className: 'w-5 h-5 text-green-600' }),
-                            React.createElement('span', { className: 'font-bold' }, waitlistCount.toLocaleString()),
-                            React.createElement('span', {}, 'dreamers already waiting!')
-                        ),
-                        isOnWaitlist ? 
-                            React.createElement('div', { className: 'text-green-600 font-bold text-lg' }, '✅ You\'re on the waitlist! We\'ll notify you when premium launches.') :
-                            React.createElement('button', {
-                                onClick: () => setShowWaitlistModal(true),
-                                className: 'waitlist-glow text-white px-8 py-4 rounded-lg text-lg font-bold hover:scale-105 transition-all'
-                            }, 'Join Waitlist - Be First! 🚀')
-                    )
-                );
-            };
-
-            return React.createElement('div', { 
-                className: `min-h-screen transition-colors duration-300 ${
-                    isDarkMode 
-                        ? 'dark bg-gray-900' 
-                        : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'
-                }` 
-            },
-                // Notifications
-                React.createElement(NotificationContainer),
-                
-                // Header
-                React.createElement('div', { 
-                    className: `shadow-sm border-b transition-colors duration-300 ${
-                        isDarkMode 
-                            ? 'bg-gray-800 border-gray-700' 
-                            : 'bg-white border-gray-100'
-                    }` 
-                },
-                    React.createElement('div', { className: 'max-w-6xl mx-auto px-4 py-4' },
-                        React.createElement('div', { className: 'flex items-center justify-between' },
-                            React.createElement('div', { className: 'flex items-center space-x-3' },
-                                React.createElement('div', { className: 'p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl' },
-                                    React.createElement(Moon, { className: 'w-6 h-6 text-white' })
-                                ),
-                                React.createElement('div', {},
-                                    React.createElement('h1', { 
-                                        className: `text-xl font-bold transition-colors duration-300 gradient-text` 
-                                    }, 'DreamVault'),
-                                    React.createElement('p', { 
-                                        className: `text-sm transition-colors duration-300 ${
-                                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                                        }` 
-                                    }, 'AI-powered dream journal & analytics')
-                                )
-                            ),
-                            React.createElement('div', { className: 'flex items-center space-x-3' },
-                                React.createElement('button', {
-                                    onClick: toggleDarkMode,
-                                    className: `p-2 rounded-lg transition-colors duration-300 ${
-                                        isDarkMode 
-                                            ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
-                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`
-                                },
-                                    isDarkMode ? 
-                                        React.createElement(Sun, { className: 'w-5 h-5' }) : 
-                                        React.createElement(Moon, { className: 'w-5 h-5' })
-                                ),
-                                isOnWaitlist ? 
-                                    React.createElement('div', { className: 'flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium' },
-                                        React.createElement(Bell, { className: 'w-4 h-4' }),
-                                        React.createElement('span', {}, 'On Waitlist')
-                                    ) :
-                                    React.createElement('button', {
-                                        onClick: () => setShowWaitlistModal(true),
-                                        className: 'waitlist-glow text-white px-4 py-2 rounded-lg text-sm font-medium hover:scale-105 transition-all'
-                                    }, 'Join Waitlist')
-                            )
-                        )
-                    )
-                ),
-
-                // Navigation
-                React.createElement('div', { 
-                    className: `border-b transition-colors duration-300 ${
-                        isDarkMode 
-                            ? 'bg-gray-800 border-gray-700' 
-                            : 'bg-white border-gray-100'
-                    }` 
-                },
-                    React.createElement('div', { className: 'max-w-6xl mx-auto px-4' },
-                        React.createElement('div', { className: 'flex space-x-8' },
-                            [
-                                { key: 'journal', icon: Moon, label: 'My Dreams' },
-                                { key: 'add', icon: Plus, label: 'Add Dream' },
-                                { key: 'timeline', icon: Timeline, label: 'Timeline' },
-                                { key: 'analytics', icon: BarChart3, label: 'Analytics' }
-                            ].map(({ key, icon: IconComponent, label }) =>
-                                React.createElement('button', {
-                                    key,
-                                    onClick: () => setCurrentView(key),
-                                    className: `py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
-                                        currentView === key
-                                            ? 'border-blue-600 text-blue-600'
-                                            : `border-transparent hover:text-blue-600 ${
-                                                isDarkMode ? 'text-gray-400' : 'text-gray-500'
-                                            }`
-                                    }`
-                                },
-                                    React.createElement('div', { className: 'flex items-center space-x-2' },
-                                        React.createElement(IconComponent, { className: 'w-4 h-4' }),
-                                        React.createElement('span', {}, label)
-                                    )
-                                )
-                            )
-                        )
-                    )
-                ),
-
-                // Main Content
-                React.createElement('div', { className: 'max-w-6xl mx-auto px-4 py-8' },
-                    currentView === 'journal' && renderJournal(),
-                    currentView === 'add' && renderAddDream(),
-                    currentView === 'timeline' && renderTimeline(),
-                    currentView === 'analytics' && renderAnalytics()
-                ),
-
-                // Floating Add Button (Mobile)
-                React.createElement('button', {
-                    onClick: () => setCurrentView('add'),
-                    className: 'fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all md:hidden transform hover:scale-110'
-                },
-                    React.createElement(Plus, { className: 'w-6 h-6' })
-                ),
-
-                // Modals
-                showWaitlistModal && React.createElement(WaitlistModal)
-            );
-        };
-
-        ReactDOM.render(React.createElement(DreamJournalApp), document.getElementById('root'));
-    </script>
-    
-    <!-- PWA Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-        
-        // Remove splash screen after app loads
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const splash = document.getElementById('splash');
-                if (splash) {
-                    splash.style.opacity = '0';
-                    splash.style.transition = 'opacity 0.5s ease-out';
-                setTimeout(() => {
-                    splash.style.opacity = '0';
-                    splash.style.transition = 'opacity 0.5s ease-out';
-                    setTimeout(() => {
-                        splash.style.display = 'none';
-                    }, 500);
-                }
-            }, 1500);
-        });
-    </script>
-</body>
-</html>            const toggleDarkMode = () => {
-                const newDarkMode = !isDarkMode;
-                setIsDarkMode(newDarkMode);
-                localStorage.setItem('dreamvault_darkmode', newDarkMode.toString());
-                
-                if (newDarkMode) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-            };
-            
-            const generateBasicAIAnalysis = async (dream) => {
-                setAiThinking(true);
-                
-                // Simulate basic AI processing (free version)
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                const basicInsights = [
-                    "Dreams often reflect our daily experiences and emotions.",
-                    "This dream may represent subconscious thoughts and feelings.",
-                    "The symbols in your dream could have personal meaning.",
-                    "Dreams help process memories and experiences from your day.",
-                    "Your subconscious mind is working through thoughts and emotions."
-                ];
-                
-                setAiThinking(false);
-                
-                return {
-                    basicInsight: basicInsights[Math.floor(Math.random() * basicInsights.length)]
-                };
-            };
-            
-            const addDream = async () => {
-                if (!newDream.title || !newDream.content) return;
-                
-                setIsLoading(true);
-                
-                // Only basic AI analysis in free version
-                const aiResult = await generateBasicAIAnalysis(newDream);
-                
-                const dreamToAdd = {
-                    ...newDream,
-                    id: Date.now(),
-                    ...aiResult
-                };
-                
-                if (isEditing) {
-                    setDreams(dreams.map(d => d.id === editingId ? dreamToAdd : d));
-                    setIsEditing(false);
-                    setEditingId(null);
-                    showNotification('Dream updated successfully! ✨', 'success');
-                } else {
-                    setDreams([dreamToAdd, ...dreams]);
-                    showNotification('New dream saved! 🌙', 'success');
-                }
-                
-                setNewDream({
-                    title: '',
-                    content: '',
-                    mood: 'neutral',
-                    lucid: false,
-                    tags: [],
-                    date: new Date().toISOString().split('T')[0]
-                });
-                
-                setCurrentView('journal');
-                setIsLoading(false);
-            };
-            
-            const editDream = (dream) => {
-                setNewDream(dream);
-                setIsEditing(true);
-                setEditingId(dream.id);
-                setCurrentView('add');
-            };
-            
-            const deleteDream = (id) => {
-                setDreams(dreams.filter(d => d.id !== id));
-                showNotification('Dream deleted', 'info');
-            };
-            
-            const joinWaitlist = () => {
-                if (!waitlistEmail || !waitlistEmail.includes('@')) {
-                    showNotification('Please enter a valid email address', 'error');
-                    return;
-                }
-                
-                // Save to localStorage (in real app, send to your backend)
-                localStorage.setItem('dreamvault_waitlist', 'true');
-                localStorage.setItem('dreamvault_waitlist_email', waitlistEmail);
-                
-                setIsOnWaitlist(true);
-                setWaitlistCount(prev => prev + 1);
-                setShowWaitlistModal(false);
-                
-                showNotification('🎉 You\'re on the waitlist! We\'ll notify you when premium launches!', 'success');
-                
-                // In real app, send email to your backend:
-                // fetch('/api/waitlist', { method: 'POST', body: JSON.stringify({ email: waitlistEmail }) })
-            };
-            
-            const filteredDreams = dreams.filter(dream =>
-                dream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                dream.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (dream.tags && dream.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
-            );
-            
-            // Components
-            const NotificationContainer = () => (
-                React.createElement('div', { className: 'fixed top-4 right-4 z-50 space-y-2' },
-                    notifications.map(notification =>
-                        React.createElement('div', {
-                            key: notification.id,
-                            className: `notification-slide px-4 py-3 rounded-lg shadow-lg max-w-sm ${
-                                notification.type === 'success' ? 'bg-green-500 text-white' :
-                                notification.type === 'error' ? 'bg-red-500 text-white' :
-                                'bg-blue-500 text-white'
-                            }`
-                        }, notification.message)
-                    )
-                )
-            );
-            
-            const StreakDisplay = () => (
-                React.createElement('div', { 
-                    className: `inline-flex items-center space-x-2 px-4 py-2 rounded-full transition-all ${
-                        isDarkMode 
-                            ? 'bg-gradient-to-r from-orange-900 to-red-900 text-orange-200' 
-                            : 'bg-gradient-to-r from-orange-100 to-red-100 text-orange-800'
-                    }` 
-                },
-                    React.createElement(Flame, { className: `w-5 h-5 streak-fire ${dreamStreak > 7 ? 'text-red-500' : 'text-orange-500'}` }),
-                    React.createElement('span', { className: 'font-bold text-sm' }, `${dreamStreak} day streak!`),
-                    dreamStreak > 7 && React.createElement('span', { className: 'text-xs' }, '🔥')
-                )
-            );
-            
-            const AIThinkingIndicator = () => (
-                React.createElement('div', { className: `flex items-center space-x-3 p-4 rounded-lg ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}` },
-                    React.createElement('div', { className: 'flex space-x-1' },
-                        React.createElement('div', { className: 'w-2 h-2 bg-blue-500 rounded-full loading-dots' }),
-                        React.createElement('div', { className: 'w-2 h-2 bg-blue-500 rounded-full loading-dots' }),
-                        React.createElement('div', { className: 'w-2 h-2 bg-blue-500 rounded-full loading-dots' })
-                    ),
-                    React.createElement('div', { className: 'flex items-center space-x-2' },
-                        React.createElement(Brain, { className: 'w-5 h-5 text-blue-600 ai-typing' }),
-                        React.createElement('span', { className: `text-sm ${isDarkMode ? 'text-blue-300' : 'text-blue-700'}` }, 'AI analyzing your dream...')
-                    )
-                )
-            );
-            
-            const WaitlistModal = () => (
-                React.createElement('div', { className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4' },
-                    React.createElement('div', { className: `rounded-2xl p-8 max-w-md w-full ${isDarkMode ? 'bg-gray-800' : 'bg-white'}` },
-                        React.createElement('div', { className: 'text-center mb-6' },
-                            React.createElement('div', { className: 'waitlist-glow w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center' },
-                                React.createElement(Crown, { className: 'w-8 h-8 text-white' })
-                            ),
-                            React.createElement('h2', { className: `text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Join the Premium Waitlist'),
-                            React.createElement('p', { className: `${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, 'Be the first to access advanced dream analytics when we launch!')
-                        ),
-                        
-                        React.createElement('div', { className: `p-4 rounded-lg mb-6 ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}` },
-                            React.createElement('h3', { className: `font-semibold mb-3 ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}` }, 'Coming Soon:'),
-                            React.createElement('div', { className: 'space-y-2 text-sm' },
-                                React.createElement('div', { className: `flex items-center space-x-2 ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` },
-                                    React.createElement(Brain, { className: 'w-4 h-4' }),
-                                    React.createElement('span', {}, 'Advanced AI dream analysis & insights')
-                                ),
-                                React.createElement('div', { className: `flex items-center space-x-2 ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` },
-                                    React.createElement(BarChart3, { className: 'w-4 h-4' }),
-                                    React.createElement('span', {}, 'Emotion charts & dream scoring')
-                                ),
-                                React.createElement('div', { className: `flex items-center space-x-2 ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` },
-                                    React.createElement(Timeline, { className: 'w-4 h-4' }),
-                                    React.createElement('span', {}, 'Pattern recognition & archetypes')
-                                ),
-                                React.createElement('div', { className: `flex items-center space-x-2 ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` },
-                                    React.createElement(Star, { className: 'w-4 h-4' }),
-                                    React.createElement('span', {}, 'Premium add-ons & export features')
-                                )
-                            )
-                        ),
-                        
-                        React.createElement('div', { className: `text-center mb-6 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}` },
-                            React.createElement('div', { className: 'flex items-center justify-center space-x-2 mb-1' },
-                                React.createElement(Users, { className: 'w-5 h-5 text-green-600' }),
-                                React.createElement('span', { className: `font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, waitlistCount.toLocaleString())
-                            ),
-                            React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'dreamers already on the waitlist!')
-                        ),
-                        
-                        React.createElement('div', { className: 'space-y-4' },
-                            React.createElement('input', {
-                                type: 'email',
-                                placeholder: 'Enter your email address',
-                                value: waitlistEmail,
-                                onChange: (e) => setWaitlistEmail(e.target.value),
-                                className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                                    isDarkMode 
-                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-                                }`
-                            }),
-                            React.createElement('button', {
-                                onClick: joinWaitlist,
-                                className: 'w-full waitlist-glow text-white py-3 rounded-lg font-semibold transition-all transform hover:scale-105'
-                            }, 'Join Waitlist - Get Notified First! 🚀'),
-                            React.createElement('button', {
-                                onClick: () => setShowWaitlistModal(false),
-                                className: `w-full py-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
-                            }, 'Maybe Later')
-                        ),
-                        
-                        React.createElement('p', { className: `text-xs text-center mt-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}` }, 
-                            'We\'ll only email you about the premium launch. No spam, ever.'
-                        )
-                    )
-                )
-            );
-            
-            const PremiumFeaturePreview = ({ title, description, comingSoon = false }) => (
-                React.createElement('div', { className: 'relative' },
-                    React.createElement('div', { className: `p-4 rounded-lg border transition-all ${
-                        comingSoon ? 'premium-blur' : ''
-                    } ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
-                        React.createElement('h4', { className: `font-medium mb-2 ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}` }, title),
-                        React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}` }, description)
-                    ),
-                    comingSoon && React.createElement('div', { className: 'coming-soon-overlay' },
-                        React.createElement('button', {
-                            onClick: () => setShowWaitlistModal(true),
-                            className: 'bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all'
-                        }, 'Join Waitlist')
-                    )
-                )
-            );
-
-            const renderJournal = () => (
-                React.createElement('div', { className: 'space-y-6' },
-                    // Waitlist promotion banner
-                    React.createElement('div', { className: `p-6 rounded-xl border-2 border-dashed ${isDarkMode ? 'border-purple-600 bg-purple-900/20' : 'border-purple-300 bg-purple-50'}` },
-                        React.createElement('div', { className: 'flex items-center justify-between' },
-                            React.createElement('div', { className: 'flex items-center space-x-4' },
-                                React.createElement('div', { className: 'waitlist-glow w-12 h-12 rounded-full flex items-center justify-center' },
-                                    React.createElement(Crown, { className: 'w-6 h-6 text-white' })
-                                ),
-                                React.createElement('div', {},
-                                    React.createElement('h3', { className: `font-bold text-lg ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Premium Features Coming Soon!'),
-                                    React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, `Join ${waitlistCount.toLocaleString()} dreamers on our waitlist for early access`)
-                                )
-                            ),
-                            isOnWaitlist ? 
-                                React.createElement('div', { className: 'text-center' },
-                                    React.createElement('div', { className: 'text-green-600 font-bold mb-1' }, '✅ You\'re on the list!'),
-                                    React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'We\'ll notify you!')
-                                ) :
-                                React.createElement('button', {
-                                    onClick: () => setShowWaitlistModal(true),
-                                    className: 'waitlist-glow text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-all'
-                                }, 'Join Waitlist')
-                        )
-                    ),
-                    
-                    // Header with streak
-                    React.createElement('div', { className: 'flex items-center justify-between flex-wrap gap-4' },
-                        React.createElement('div', { className: 'flex items-center space-x-4' },
-                            React.createElement('h2', { className: `text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Your Dreams'),
-                            dreamStreak > 0 && React.createElement(StreakDisplay)
-                        ),
-                        React.createElement('div', { className: 'flex items-center space-x-3' },
-                            React.createElement('div', { className: 'relative' },
-                                React.createElement(Search, { className: `w-4 h-4 absolute left-3 top-3 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}` }),
-                                React.createElement('input', {
-                                    type: 'text',
-                                    placeholder: 'Search dreams...',
-                                    value: searchQuery,
-                                    onChange: (e) => setSearchQuery(e.target.value),
-                                    className: `pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                                        isDarkMode 
-                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                                            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
-                                    }`
-                                })
-                            )
-                        )
-                    ),
-                    
-                    // Daily prompt
-                    React.createElement('div', { 
-                        className: `p-4 rounded-lg border-l-4 border-blue-400 ${
-                            isDarkMode ? 'bg-blue-900/20' : 'bg-blue-50'
-                        }` 
-                    },
-                        React.createElement('div', { className: 'flex items-center space-x-2 mb-2' },
-                            React.createElement(Lightbulb, { className: 'w-5 h-5 text-yellow-500' }),
-                            React.createElement('span', { className: `font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}` }, "Today's Dream Prompt")
-                        ),
-                        React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` }, currentPrompt)
-                    ),
-                    
-                    // AI Thinking indicator
-                    aiThinking && React.createElement(AIThinkingIndicator),
-                    
-                    // Dreams list
-                    filteredDreams.length === 0 ? 
-                        React.createElement('div', { className: `text-center py-12 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` },
-                            React.createElement(Moon, { className: `w-16 h-16 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-300'}` }),
-                            React.createElement('p', {}, 'No dreams yet. Start recording your dreams!'),
-                            React.createElement('p', { className: 'text-sm mt-2' }, 'Use the prompt above to get started')
-                        ) :
-                        React.createElement('div', { className: 'space-y-6' },
-                            filteredDreams.map(dream => 
-                                React.createElement('div', { 
-                                    key: dream.id, 
-                                    className: `dream-card border rounded-xl p-6 hover:shadow-lg transition-all ${
-                                        isDarkMode 
-                                            ? 'bg-gray-800 border-gray-700 hover:shadow-gray-900/25' 
-                                            : 'bg-white border-gray-200'
-                                    }` 
-                                },
-                                    // Dream header
-                                    React.createElement('div', { className: 'flex items-start justify-between mb-4' },
-                                        React.createElement('div', { className: 'flex-1' },
-                                            React.createElement('div', { className: 'flex items-center space-x-3 mb-2' },
-                                                React.createElement('h3', { className: `text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, dream.title),
-                                                dream.lucid && React.createElement(Star, { className: 'w-5 h-5 text-yellow-500' })
-                                            ),
-                                            React.createElement('div', { className: 'flex items-center space-x-4 text-sm' },
-                                                React.createElement('span', { className: `${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, dream.date)
-                                            )
-                                        ),
-                                        React.createElement('div', { className: 'flex items-center space-x-2' },
-                                            React.createElement('button', {
-                                                onClick: () => editDream(dream),
-                                                className: `p-2 rounded-lg hover:text-blue-500 transition-colors ${isDarkMode ? 'text-gray-500 hover:bg-gray-700' : 'text-gray-400 hover:bg-gray-100'}`
-                                            }, React.createElement(Edit3, { className: 'w-4 h-4' })),
-                                            React.createElement('button', {
-                                                onClick: () => deleteDream(dream.id),
-                                                className: `p-2 rounded-lg hover:text-red-500 transition-colors ${isDarkMode ? 'text-gray-500 hover:bg-gray-700' : 'text-gray-400 hover:bg-gray-100'}`
-                                            }, React.createElement(Trash2, { className: 'w-4 h-4' }))
-                                        )
-                                    ),
-                                    
-                                    // Dream content
-                                    React.createElement('p', { className: `mb-4 leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, dream.content),
-                                    
-                                    // Mood and tags
-                                    React.createElement('div', { className: 'flex items-center justify-between mb-4' },
-                                        React.createElement('div', { className: 'flex items-center space-x-3' },
-                                            React.createElement('span', { 
-                                                className: `px-3 py-1 rounded-full text-xs font-medium ${
-                                                    dream.mood === 'happy' ? 'bg-green-100 text-green-800' :
-                                                    dream.mood === 'anxious' ? 'bg-red-100 text-red-800' :
-                                                    dream.mood === 'sad' ? 'bg-blue-100 text-blue-800' :
-                                                    dream.mood === 'confused' ? 'bg-purple-100 text-purple-800' :
-                                                    'bg-gray-100 text-gray-800'
-                                                }` 
-                                            }, dream.mood),
-                                            React.createElement('div', { className: 'flex flex-wrap gap-1' },
-                                                (dream.tags || []).map(tag => 
-                                                    React.createElement('span', {
-                                                        key: tag,
-                                                        className: `px-2 py-1 text-xs rounded-full ${
-                                                            isDarkMode 
-                                                                ? 'bg-blue-900 text-blue-300' 
-                                                                : 'bg-blue-100 text-blue-800'
-                                                        }`
-                                                    }, `#${tag}`)
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    
-                                    // Basic AI Insight (free version)
-                                    dream.basicInsight && React.createElement('div', { className: `p-4 rounded-lg border-l-4 border-blue-400 ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}` },
-                                        React.createElement('div', { className: 'flex items-center justify-between mb-2' },
-                                            React.createElement('div', { className: 'flex items-center space-x-2' },
-                                                React.createElement(Brain, { className: 'w-5 h-5 text-blue-600' }),
-                                                React.createElement('span', { className: `text-sm font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}` }, 'Basic AI Insight')
-                                            ),
-                                            React.createElement('Crown', { className: 'w-4 h-4 text-yellow-500' })
-                                        ),
-                                        React.createElement('p', { className: `text-sm mb-3 ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` }, dream.basicInsight),
-                                        React.createElement('button', {
-                                            onClick: () => setShowWaitlistModal(true),
-                                            className: `text-xs font-medium hover:underline ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`
-                                        }, '🔮 Get Advanced Analysis, Emotions & Patterns → Join Waitlist')
-                                    )
-                                )
-                            )
-                        )
-                )
-            );
-
-            const renderAddDream = () => (
-                React.createElement('div', { className: 'max-w-2xl mx-auto' },
-                    React.createElement('div', { className: 'flex items-center space-x-3 mb-6' },
-                        React.createElement('h2', { className: `text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}` },
-                            isEditing ? 'Edit Dream' : 'Record New Dream'
-                        ),
-                        dreamStreak > 0 && React.createElement(StreakDisplay)
-                    ),
-                    
-                    // Daily prompt reminder
-                    !isEditing && React.createElement('div', { 
-                        className: `p-4 rounded-lg border-l-4 border-yellow-400 mb-6 ${
-                            isDarkMode ? 'bg-yellow-900/20' : 'bg-yellow-50'
-                        }` 
-                    },
-                        React.createElement('div', { className: 'flex items-center space-x-2 mb-1' },
-                            React.createElement(Lightbulb, { className: 'w-4 h-4 text-yellow-500' }),
-                            React.createElement('span', { className: `text-sm font-medium ${isDarkMode ? 'text-yellow-300' : 'text-yellow-800'}` }, "Today's Prompt")
-                        ),
-                        React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-yellow-200' : 'text-yellow-700'}` }, currentPrompt)
-                    ),
-                    
-                    React.createElement('div', { className: `border rounded-xl p-6 space-y-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
-                        React.createElement('div', {},
-                            React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Dream Title'),
-                            React.createElement('input', {
-                                type: 'text',
-                                value: newDream.title,
-                                onChange: (e) => setNewDream({...newDream, title: e.target.value}),
-                                placeholder: 'Give your dream a memorable title...',
-                                className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                                    isDarkMode 
-                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
-                                }`
-                            })
-                        ),
-                        
-                        React.createElement('div', {},
-                            React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Dream Description'),
-                            React.createElement('textarea', {
-                                value: newDream.content,
-                                onChange: (e) => setNewDream({...newDream, content: e.target.value}),
-                                placeholder: 'Describe your dream in detail... What did you see, feel, and experience?',
-                                rows: 6,
-                                className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                                    isDarkMode 
-                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
-                                }`
-                            })
-                        ),
-                        
-                        React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
-                            React.createElement('div', {},
-                                React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Overall Mood'),
-                                React.createElement('select', {
-                                    value: newDream.mood,
-                                    onChange: (e) => setNewDream({...newDream, mood: e.target.value}),
-                                    className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                                        isDarkMode 
-                                            ? 'bg-gray-700 border-gray-600 text-white' 
-                                            : 'bg-white border-gray-200 text-gray-900'
-                                    }`
-                                },
-                                    React.createElement('option', { value: 'happy' }, '😊 Happy & Joyful'),
-                                    React.createElement('option', { value: 'anxious' }, '😰 Anxious & Worried'),
-                                    React.createElement('option', { value: 'sad' }, '😢 Sad & Melancholy'),
-                                    React.createElement('option', { value: 'excited' }, '🤩 Excited & Energetic'),
-                                    React.createElement('option', { value: 'neutral' }, '😐 Neutral &<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -969,10 +19,9 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
     <!-- Icons -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
     
-    <!-- React and Dependencies -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Scripts in correct order -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Force cache busting -->
@@ -981,19 +30,16 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
     <meta http-equiv="Expires" content="0">
     
     <style>
-        .ad-banner {
-            background: linear-gradient(45deg, #f3f4f6, #e5e7eb);
-            border: 1px dashed #d1d5db;
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+        .waitlist-glow {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+            background-size: 300% 300%;
+            animation: gradientShift 3s ease infinite;
         }
         
-        .dark .ad-banner {
-            background: linear-gradient(45deg, #374151, #4b5563);
-            border: 1px dashed #6b7280;
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .loading-dots {
@@ -1040,36 +86,6 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
             50% { opacity: 0.8; }
         }
         
-        .emotion-bar {
-            transition: width 1s ease-in-out;
-        }
-        
-        .timeline-dot {
-            animation: fadeInUp 0.5s ease forwards;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .dark {
-            color-scheme: dark;
-        }
-        
-        .gradient-text {
-            background: linear-gradient(45deg, #6366f1, #8b5cf6, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
         .notification-slide {
             animation: slideInRight 0.3s ease-out;
         }
@@ -1096,26 +112,6 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
             align-items: center;
             justify-content: center;
             z-index: 9999;
-            animation: fadeOut 0.5s ease-in-out 2s forwards;
-        }
-        
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                visibility: hidden;
-            }
-        }
-        
-        .waitlist-glow {
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
-            background-size: 300% 300%;
-            animation: gradientShift 3s ease infinite;
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
         
         .premium-blur {
@@ -1137,6 +133,17 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
             border-radius: 8px;
             z-index: 10;
         }
+        
+        .dark {
+            color-scheme: dark;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, #6366f1, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
     </style>
 </head>
 <body>
@@ -1156,195 +163,23 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
 
     <div id="root"></div>
     
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+    <script>
+        // Remove splash screen
+        setTimeout(() => {
+            const splash = document.getElementById('splash');
+            if (splash) {
+                splash.style.opacity = '0';
+                splash.style.transition = 'opacity 0.5s ease-out';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 500);
+            }
+        }, 2000);
         
-        // Icon Components (keeping all the same icons)
-        const Plus = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M5 12h14' }),
-            React.createElement('path', { d: 'm12 5 0 14' })
-        );
+        // Create React components without JSX
+        const { useState, useEffect } = React;
         
-        const Moon = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, React.createElement('path', { d: 'M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z' }));
-        
-        const Sun = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('circle', { cx: 12, cy: 12, r: 4 }),
-            React.createElement('path', { d: 'm12 2 0 2' }),
-            React.createElement('path', { d: 'm12 20 0 2' }),
-            React.createElement('path', { d: 'm4.93 4.93 1.41 1.41' }),
-            React.createElement('path', { d: 'm17.66 17.66 1.41 1.41' }),
-            React.createElement('path', { d: 'M2 12h2' }),
-            React.createElement('path', { d: 'M20 12h2' }),
-            React.createElement('path', { d: 'm6.34 17.66-1.41 1.41' }),
-            React.createElement('path', { d: 'm19.07 4.93-1.41 1.41' })
-        );
-        
-        const BarChart3 = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M3 3v18h18' }),
-            React.createElement('path', { d: 'M18 17V9' }),
-            React.createElement('path', { d: 'M13 17V5' }),
-            React.createElement('path', { d: 'M8 17v-3' })
-        );
-        
-        const Timeline = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M3 3v18h18' }),
-            React.createElement('circle', { cx: 9, cy: 9, r: 2 }),
-            React.createElement('path', { d: 'm20 15-6-6' }),
-            React.createElement('path', { d: 'm6 18 6-6' }),
-            React.createElement('circle', { cx: 15, cy: 15, r: 2 })
-        );
-        
-        const Calendar = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M8 2v4' }),
-            React.createElement('path', { d: 'M16 2v4' }),
-            React.createElement('rect', { width: 18, height: 18, x: 3, y: 4, rx: 2 }),
-            React.createElement('path', { d: 'M3 10h18' })
-        );
-        
-        const Crown = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, React.createElement('path', { d: 'm2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm0 16h20' }));
-        
-        const Search = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('circle', { cx: 11, cy: 11, r: 8 }),
-            React.createElement('path', { d: 'm21 21-4.35-4.35' })
-        );
-        
-        const Star = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, React.createElement('polygon', { points: '12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26' }));
-        
-        const Edit3 = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M12 20h9' }),
-            React.createElement('path', { d: 'M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' })
-        );
-        
-        const Trash2 = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M3 6h18' }),
-            React.createElement('path', { d: 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6' }),
-            React.createElement('path', { d: 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2' })
-        );
-        
-        const Brain = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z' }),
-            React.createElement('path', { d: 'M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z' }),
-            React.createElement('path', { d: 'M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4' })
-        );
-        
-        const Flame = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, React.createElement('path', { d: 'M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z' }));
-        
-        const Heart = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, React.createElement('path', { d: 'm19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z' }));
-        
-        const Lightbulb = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 12 2c-3.3 0-6 2.7-6 6 0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5' }),
-            React.createElement('path', { d: 'M9 18h6' }),
-            React.createElement('path', { d: 'M10 22h4' })
-        );
-        
-        const Bell = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9' }),
-            React.createElement('path', { d: 'M10.3 21a1.94 1.94 0 0 0 3.4 0' })
-        );
-        
-        const Mail = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z' }),
-            React.createElement('polyline', { points: '22,6 12,13 2,6' })
-        );
-        
-        const Users = ({ className }) => React.createElement('svg', {
-            xmlns: 'http://www.w3.org/2000/svg',
-            width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none',
-            stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round',
-            strokeLinejoin: 'round', className
-        }, 
-            React.createElement('path', { d: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2' }),
-            React.createElement('circle', { cx: 9, cy: 7, r: 4 }),
-            React.createElement('path', { d: 'm22 21-3-3 3-3' }),
-            React.createElement('path', { d: 'M16 3h2a2 2 0 0 1 2 2v4' })
-        );
-
-        const DreamJournalApp = () => {
+        function DreamJournalApp() {
             const [currentView, setCurrentView] = useState('journal');
             const [dreams, setDreams] = useState([]);
             const [newDream, setNewDream] = useState({
@@ -1367,10 +202,9 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
             const [currentPrompt, setCurrentPrompt] = useState('');
             const [notifications, setNotifications] = useState([]);
             const [waitlistEmail, setWaitlistEmail] = useState('');
-            const [waitlistCount, setWaitlistCount] = useState(1247); // Starting number for social proof
+            const [waitlistCount, setWaitlistCount] = useState(1247);
             const [isOnWaitlist, setIsOnWaitlist] = useState(false);
             
-            // Daily dream prompts
             const dreamPrompts = [
                 "What colors dominated your dream landscape?",
                 "Did you encounter any familiar faces from your past?",
@@ -1381,25 +215,8 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
                 "What sounds or music did you hear in your dream?",
                 "Were you flying, falling, or moving in unusual ways?",
                 "Did you have any conversations? What were they about?",
-                "What objects or symbols stood out to you?",
-                "Did time feel normal or distorted in your dream?",
-                "What was the weather like in your dream?",
-                "Were there any animals in your dream?",
-                "Did you feel safe or threatened?",
-                "What was your role in the dream - observer or participant?"
+                "What objects or symbols stood out to you?"
             ];
-            
-            // Remove splash screen after loading
-            useEffect(() => {
-                const timer = setTimeout(() => {
-                    const splash = document.getElementById('splash');
-                    if (splash) {
-                        splash.style.display = 'none';
-                    }
-                }, 2500);
-                
-                return () => clearTimeout(timer);
-            }, []);
             
             useEffect(() => {
                 // Load data from localStorage
@@ -1407,11 +224,12 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
                 const savedStreak = localStorage.getItem('dreamvault_streak');
                 const savedLastDate = localStorage.getItem('dreamvault_last_dream');
                 const savedWaitlist = localStorage.getItem('dreamvault_waitlist');
+                const savedDarkMode = localStorage.getItem('dreamvault_darkmode');
                 
                 if (savedDreams) {
                     setDreams(JSON.parse(savedDreams));
                 } else {
-                    // Sample dreams for demo (basic features only)
+                    // Sample dreams
                     const sampleDreams = [
                         {
                             id: 1,
@@ -1426,7 +244,7 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
                         {
                             id: 2,
                             title: "Lost Library",
-                            content: "I wandered through endless corridors of books, searching for something I couldn't remember. The books kept changing languages.",
+                            content: "I wandered through endless corridors of books, searching for something I couldn't remember.",
                             mood: 'confused',
                             lucid: false,
                             tags: ['books', 'searching', 'confusion'],
@@ -1437,8 +255,6 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
                     setDreams(sampleDreams);
                 }
                 
-                // Load other settings
-                const savedDarkMode = localStorage.getItem('dreamvault_darkmode');
                 if (savedDarkMode === 'true') {
                     setIsDarkMode(true);
                     document.documentElement.classList.add('dark');
@@ -1451,10 +267,8 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
                 // Set daily prompt
                 const today = new Date().getDate();
                 setCurrentPrompt(dreamPrompts[today % dreamPrompts.length]);
-                
             }, []);
             
-            // Save dreams and update streak
             useEffect(() => {
                 if (dreams.length > 0) {
                     localStorage.setItem('dreamvault_dreams', JSON.stringify(dreams));
@@ -1463,13 +277,8 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
             }, [dreams]);
             
             const showNotification = (message, type = 'info') => {
-                const notification = {
-                    id: Date.now(),
-                    message,
-                    type
-                };
+                const notification = { id: Date.now(), message, type };
                 setNotifications(prev => [...prev, notification]);
-                
                 setTimeout(() => {
                     setNotifications(prev => prev.filter(n => n.id !== notification.id));
                 }, 3000);
@@ -1493,7 +302,7 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
                             localStorage.setItem('dreamvault_streak', newStreak.toString());
                             
                             if (newStreak % 7 === 0) {
-                                showNotification(`🔥 Amazing! ${newStreak} day streak! Keep it up!`, 'success');
+                                showNotification(`🔥 Amazing! ${newStreak} day streak!`, 'success');
                             }
                         } else if (daysDiff > 1) {
                             setDreamStreak(1);
@@ -1502,7 +311,7 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
                     } else {
                         setDreamStreak(1);
                         localStorage.setItem('dreamvault_streak', '1');
-                        showNotification('🌙 Welcome to DreamVault! Your journey begins!', 'success');
+                        showNotification('🌙 Welcome to DreamVault!', 'success');
                     }
                     
                     setLastDreamDate(today);
@@ -1512,3 +321,612 @@ React.createElement('option', { value: 'neutral' }, '😐 Neutral & Calm'),
             
             const toggleDarkMode = () => {
                 const newDarkMode = !isDarkMode;
+                setIsDarkMode(newDarkMode);
+                localStorage.setItem('dreamvault_darkmode', newDarkMode.toString());
+                
+                if (newDarkMode) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            };
+            
+            const generateBasicAIAnalysis = async (dream) => {
+                setAiThinking(true);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                const basicInsights = [
+                    "Dreams often reflect our daily experiences and emotions.",
+                    "This dream may represent subconscious thoughts and feelings.",
+                    "The symbols in your dream could have personal meaning.",
+                    "Dreams help process memories and experiences from your day.",
+                    "Your subconscious mind is working through thoughts and emotions."
+                ];
+                
+                setAiThinking(false);
+                return {
+                    basicInsight: basicInsights[Math.floor(Math.random() * basicInsights.length)]
+                };
+            };
+            
+            const addDream = async () => {
+                if (!newDream.title || !newDream.content) return;
+                
+                setIsLoading(true);
+                const aiResult = await generateBasicAIAnalysis(newDream);
+                
+                const dreamToAdd = {
+                    ...newDream,
+                    id: Date.now(),
+                    ...aiResult
+                };
+                
+                if (isEditing) {
+                    setDreams(dreams.map(d => d.id === editingId ? dreamToAdd : d));
+                    setIsEditing(false);
+                    setEditingId(null);
+                    showNotification('Dream updated! ✨', 'success');
+                } else {
+                    setDreams([dreamToAdd, ...dreams]);
+                    showNotification('New dream saved! 🌙', 'success');
+                }
+                
+                setNewDream({
+                    title: '',
+                    content: '',
+                    mood: 'neutral',
+                    lucid: false,
+                    tags: [],
+                    date: new Date().toISOString().split('T')[0]
+                });
+                
+                setCurrentView('journal');
+                setIsLoading(false);
+            };
+            
+            const editDream = (dream) => {
+                setNewDream(dream);
+                setIsEditing(true);
+                setEditingId(dream.id);
+                setCurrentView('add');
+            };
+            
+            const deleteDream = (id) => {
+                setDreams(dreams.filter(d => d.id !== id));
+                showNotification('Dream deleted', 'info');
+            };
+            
+            const joinWaitlist = () => {
+                if (!waitlistEmail || !waitlistEmail.includes('@')) {
+                    showNotification('Please enter a valid email address', 'error');
+                    return;
+                }
+                
+                localStorage.setItem('dreamvault_waitlist', 'true');
+                localStorage.setItem('dreamvault_waitlist_email', waitlistEmail);
+                
+                setIsOnWaitlist(true);
+                setWaitlistCount(prev => prev + 1);
+                setShowWaitlistModal(false);
+                
+                showNotification('🎉 You\'re on the waitlist! We\'ll notify you when premium launches!', 'success');
+            };
+            
+            const filteredDreams = dreams.filter(dream =>
+                dream.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                dream.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (dream.tags && dream.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+            );
+            
+            // Simple icons as text
+            const MoonIcon = () => React.createElement('span', {}, '🌙');
+            const PlusIcon = () => React.createElement('span', {}, '➕');
+            const SunIcon = () => React.createElement('span', {}, '☀️');
+            const ChartIcon = () => React.createElement('span', {}, '📊');
+            const TimelineIcon = () => React.createElement('span', {}, '📈');
+            const CrownIcon = () => React.createElement('span', {}, '👑');
+            const SearchIcon = () => React.createElement('span', {}, '🔍');
+            const StarIcon = () => React.createElement('span', {}, '⭐');
+            const EditIcon = () => React.createElement('span', {}, '✏️');
+            const DeleteIcon = () => React.createElement('span', {}, '🗑️');
+            const BrainIcon = () => React.createElement('span', {}, '🧠');
+            const FlameIcon = () => React.createElement('span', {}, '🔥');
+            const LightbulbIcon = () => React.createElement('span', {}, '💡');
+            const BellIcon = () => React.createElement('span', {}, '🔔');
+            const UsersIcon = () => React.createElement('span', {}, '👥');
+            
+            return React.createElement('div', { 
+                className: `min-h-screen transition-colors duration-300 ${
+                    isDarkMode 
+                        ? 'dark bg-gray-900' 
+                        : 'bg-gradient-to-br from-indigo-50 via-white to-purple-50'
+                }` 
+            },
+                // Notifications
+                React.createElement('div', { className: 'fixed top-4 right-4 z-50 space-y-2' },
+                    notifications.map(notification =>
+                        React.createElement('div', {
+                            key: notification.id,
+                            className: `notification-slide px-4 py-3 rounded-lg shadow-lg max-w-sm ${
+                                notification.type === 'success' ? 'bg-green-500 text-white' :
+                                notification.type === 'error' ? 'bg-red-500 text-white' :
+                                'bg-blue-500 text-white'
+                            }`
+                        }, notification.message)
+                    )
+                ),
+                
+                // Header
+                React.createElement('div', { 
+                    className: `shadow-sm border-b transition-colors duration-300 ${
+                        isDarkMode 
+                            ? 'bg-gray-800 border-gray-700' 
+                            : 'bg-white border-gray-100'
+                    }` 
+                },
+                    React.createElement('div', { className: 'max-w-6xl mx-auto px-4 py-4' },
+                        React.createElement('div', { className: 'flex items-center justify-between' },
+                            React.createElement('div', { className: 'flex items-center space-x-3' },
+                                React.createElement('div', { className: 'p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl' },
+                                    React.createElement(MoonIcon)
+                                ),
+                                React.createElement('div', {},
+                                    React.createElement('h1', { 
+                                        className: `text-xl font-bold transition-colors duration-300 gradient-text` 
+                                    }, 'DreamVault'),
+                                    React.createElement('p', { 
+                                        className: `text-sm transition-colors duration-300 ${
+                                            isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                        }` 
+                                    }, 'AI-powered dream journal & analytics')
+                                )
+                            ),
+                            React.createElement('div', { className: 'flex items-center space-x-3' },
+                                React.createElement('button', {
+                                    onClick: toggleDarkMode,
+                                    className: `p-2 rounded-lg transition-colors duration-300 ${
+                                        isDarkMode 
+                                            ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
+                                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`
+                                },
+                                    isDarkMode ? React.createElement(SunIcon) : React.createElement(MoonIcon)
+                                ),
+                                isOnWaitlist ? 
+                                    React.createElement('div', { className: 'flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium' },
+                                        React.createElement(BellIcon),
+                                        React.createElement('span', {}, 'On Waitlist')
+                                    ) :
+                                    React.createElement('button', {
+                                        onClick: () => setShowWaitlistModal(true),
+                                        className: 'waitlist-glow text-white px-4 py-2 rounded-lg text-sm font-medium hover:scale-105 transition-all'
+                                    }, 'Join Waitlist')
+                            )
+                        )
+                    )
+                ),
+
+                // Navigation
+                React.createElement('div', { 
+                    className: `border-b transition-colors duration-300 ${
+                        isDarkMode 
+                            ? 'bg-gray-800 border-gray-700' 
+                            : 'bg-white border-gray-100'
+                    }` 
+                },
+                    React.createElement('div', { className: 'max-w-6xl mx-auto px-4' },
+                        React.createElement('div', { className: 'flex space-x-8' },
+                            [
+                                { key: 'journal', icon: MoonIcon, label: 'My Dreams' },
+                                { key: 'add', icon: PlusIcon, label: 'Add Dream' },
+                                { key: 'timeline', icon: TimelineIcon, label: 'Timeline' },
+                                { key: 'analytics', icon: ChartIcon, label: 'Analytics' }
+                            ].map(({ key, icon: IconComponent, label }) =>
+                                React.createElement('button', {
+                                    key,
+                                    onClick: () => setCurrentView(key),
+                                    className: `py-4 px-2 border-b-2 font-medium text-sm transition-colors ${
+                                        currentView === key
+                                            ? 'border-blue-600 text-blue-600'
+                                            : `border-transparent hover:text-blue-600 ${
+                                                isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                                            }`
+                                    }`
+                                },
+                                    React.createElement('div', { className: 'flex items-center space-x-2' },
+                                        React.createElement(IconComponent),
+                                        React.createElement('span', {}, label)
+                                    )
+                                )
+                            )
+                        )
+                    )
+                ),
+
+                // Main Content
+                React.createElement('div', { className: 'max-w-6xl mx-auto px-4 py-8' },
+                    // Waitlist banner for all views
+                    React.createElement('div', { className: `p-6 rounded-xl border-2 border-dashed mb-6 ${isDarkMode ? 'border-purple-600 bg-purple-900/20' : 'border-purple-300 bg-purple-50'}` },
+                        React.createElement('div', { className: 'flex items-center justify-between' },
+                            React.createElement('div', { className: 'flex items-center space-x-4' },
+                                React.createElement('div', { className: 'waitlist-glow w-12 h-12 rounded-full flex items-center justify-center' },
+                                    React.createElement(CrownIcon)
+                                ),
+                                React.createElement('div', {},
+                                    React.createElement('h3', { className: `font-bold text-lg ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Premium Features Coming Soon!'),
+                                    React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, `Join ${waitlistCount.toLocaleString()} dreamers on our waitlist`)
+                                )
+                            ),
+                            isOnWaitlist ? 
+                                React.createElement('div', { className: 'text-center' },
+                                    React.createElement('div', { className: 'text-green-600 font-bold mb-1' }, '✅ You\'re on the list!'),
+                                    React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'We\'ll notify you!')
+                                ) :
+                                React.createElement('button', {
+                                    onClick: () => setShowWaitlistModal(true),
+                                    className: 'waitlist-glow text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-all'
+                                }, 'Join Waitlist')
+                        )
+                    ),
+                    
+                    // Current view content
+                    currentView === 'journal' && React.createElement('div', { className: 'space-y-6' },
+                        // Daily prompt
+                        React.createElement('div', { 
+                            className: `p-4 rounded-lg border-l-4 border-blue-400 ${
+                                isDarkMode ? 'bg-blue-900/20' : 'bg-blue-50'
+                            }` 
+                        },
+                            React.createElement('div', { className: 'flex items-center space-x-2 mb-2' },
+                                React.createElement(LightbulbIcon),
+                                React.createElement('span', { className: `font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}` }, "Today's Dream Prompt")
+                            ),
+                            React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` }, currentPrompt)
+                        ),
+                        
+                        // Dreams list
+                        filteredDreams.length === 0 ? 
+                            React.createElement('div', { className: `text-center py-12 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` },
+                                React.createElement('div', { className: 'text-6xl mb-4' }, '🌙'),
+                                React.createElement('p', {}, 'No dreams yet. Start recording your dreams!'),
+                                React.createElement('p', { className: 'text-sm mt-2' }, 'Use the prompt above to get started')
+                            ) :
+                            React.createElement('div', { className: 'space-y-6' },
+                                filteredDreams.map(dream => 
+                                    React.createElement('div', { 
+                                        key: dream.id, 
+                                        className: `dream-card border rounded-xl p-6 hover:shadow-lg transition-all ${
+                                            isDarkMode 
+                                                ? 'bg-gray-800 border-gray-700 hover:shadow-gray-900/25' 
+                                                : 'bg-white border-gray-200'
+                                        }` 
+                                    },
+                                        React.createElement('div', { className: 'flex items-start justify-between mb-4' },
+                                            React.createElement('div', { className: 'flex-1' },
+                                                React.createElement('div', { className: 'flex items-center space-x-3 mb-2' },
+                                                    React.createElement('h3', { className: `text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, dream.title),
+                                                    dream.lucid && React.createElement(StarIcon)
+                                                ),
+                                                React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, dream.date)
+                                            ),
+                                            React.createElement('div', { className: 'flex items-center space-x-2' },
+                                                React.createElement('button', {
+                                                    onClick: () => editDream(dream),
+                                                    className: `p-2 rounded-lg hover:text-blue-500 transition-colors ${isDarkMode ? 'text-gray-500 hover:bg-gray-700' : 'text-gray-400 hover:bg-gray-100'}`
+                                                }, React.createElement(EditIcon)),
+                                                React.createElement('button', {
+                                                    onClick: () => deleteDream(dream.id),
+                                                    className: `p-2 rounded-lg hover:text-red-500 transition-colors ${isDarkMode ? 'text-gray-500 hover:bg-gray-700' : 'text-gray-400 hover:bg-gray-100'}`
+                                                }, React.createElement(DeleteIcon))
+                                            )
+                                        ),
+                                        
+                                        React.createElement('p', { className: `mb-4 leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, dream.content),
+                                        
+                                        React.createElement('div', { className: 'flex items-center space-x-3 mb-4' },
+                                            React.createElement('span', { 
+                                                className: `px-3 py-1 rounded-full text-xs font-medium ${
+                                                    dream.mood === 'happy' ? 'bg-green-100 text-green-800' :
+                                                    dream.mood === 'anxious' ? 'bg-red-100 text-red-800' :
+                                                    dream.mood === 'sad' ? 'bg-blue-100 text-blue-800' :
+                                                    'bg-gray-100 text-gray-800'
+                                                }` 
+                                            }, dream.mood),
+                                            React.createElement('div', { className: 'flex flex-wrap gap-1' },
+                                                (dream.tags || []).map(tag => 
+                                                    React.createElement('span', {
+                                                        key: tag,
+                                                        className: `px-2 py-1 text-xs rounded-full ${
+                                                            isDarkMode 
+                                                                ? 'bg-blue-900 text-blue-300' 
+                                                                : 'bg-blue-100 text-blue-800'
+                                                        }`
+                                                    }, `#${tag}`)
+                                                )
+                                            )
+                                        ),
+                                        
+                                        dream.basicInsight && React.createElement('div', { className: `p-4 rounded-lg border-l-4 border-blue-400 ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}` },
+                                            React.createElement('div', { className: 'flex items-center justify-between mb-2' },
+                                                React.createElement('div', { className: 'flex items-center space-x-2' },
+                                                    React.createElement(BrainIcon),
+                                                    React.createElement('span', { className: `text-sm font-medium ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}` }, 'Basic AI Insight')
+                                                ),
+                                                React.createElement(CrownIcon)
+                                            ),
+                                            React.createElement('p', { className: `text-sm mb-3 ${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` }, dream.basicInsight),
+                                            React.createElement('button', {
+                                                onClick: () => setShowWaitlistModal(true),
+                                                className: `text-xs font-medium hover:underline ${isDarkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`
+                                            }, '🔮 Get Advanced Analysis → Join Waitlist')
+                                        )
+                                    )
+                                )
+                            )
+                    ),
+                    
+                    // Add Dream View
+                    currentView === 'add' && React.createElement('div', { className: 'max-w-2xl mx-auto' },
+                        React.createElement('h2', { className: `text-xl font-semibold mb-6 ${isDarkMode ? 'text-white' : 'text-gray-800'}` },
+                            isEditing ? 'Edit Dream' : 'Record New Dream'
+                        ),
+                        
+                        React.createElement('div', { className: `border rounded-xl p-6 space-y-6 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
+                            React.createElement('div', {},
+                                React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Dream Title'),
+                                React.createElement('input', {
+                                    type: 'text',
+                                    value: newDream.title,
+                                    onChange: (e) => setNewDream({...newDream, title: e.target.value}),
+                                    placeholder: 'Give your dream a memorable title...',
+                                    className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                                        isDarkMode 
+                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                                            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
+                                    }`
+                                })
+                            ),
+                            
+                            React.createElement('div', {},
+                                React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Dream Description'),
+                                React.createElement('textarea', {
+                                    value: newDream.content,
+                                    onChange: (e) => setNewDream({...newDream, content: e.target.value}),
+                                    placeholder: 'Describe your dream in detail...',
+                                    rows: 6,
+                                    className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                                        isDarkMode 
+                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                                            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
+                                    }`
+                                })
+                            ),
+                            
+                            React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
+                                React.createElement('div', {},
+                                    React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Mood'),
+                                    React.createElement('select', {
+                                        value: newDream.mood,
+                                        onChange: (e) => setNewDream({...newDream, mood: e.target.value}),
+                                        className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                                            isDarkMode 
+                                                ? 'bg-gray-700 border-gray-600 text-white' 
+                                                : 'bg-white border-gray-200 text-gray-900'
+                                        }`
+                                    },
+                                        React.createElement('option', { value: 'happy' }, '😊 Happy'),
+                                        React.createElement('option', { value: 'anxious' }, '😰 Anxious'),
+                                        React.createElement('option', { value: 'sad' }, '😢 Sad'),
+                                        React.createElement('option', { value: 'excited' }, '🤩 Excited'),
+                                        React.createElement('option', { value: 'neutral' }, '😐 Neutral'),
+                                        React.createElement('option', { value: 'confused' }, '😕 Confused')
+                                    )
+                                ),
+                                
+                                React.createElement('div', {},
+                                    React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Date'),
+                                    React.createElement('input', {
+                                        type: 'date',
+                                        value: newDream.date,
+                                        onChange: (e) => setNewDream({...newDream, date: e.target.value}),
+                                        className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                                            isDarkMode 
+                                                ? 'bg-gray-700 border-gray-600 text-white' 
+                                                : 'bg-white border-gray-200 text-gray-900'
+                                        }`
+                                    })
+                                )
+                            ),
+                            
+                            React.createElement('div', { className: 'flex items-center space-x-3' },
+                                React.createElement('input', {
+                                    type: 'checkbox',
+                                    checked: newDream.lucid,
+                                    onChange: (e) => setNewDream({...newDream, lucid: e.target.checked}),
+                                    className: 'w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500'
+                                }),
+                                React.createElement('span', { className: `text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Lucid Dream'),
+                                React.createElement(StarIcon)
+                            ),
+                            
+                            React.createElement('div', {},
+                                React.createElement('label', { className: `block text-sm font-medium mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}` }, 'Tags'),
+                                React.createElement('input', {
+                                    type: 'text',
+                                    value: (newDream.tags || []).join(', '),
+                                    onChange: (e) => setNewDream({...newDream, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t)}),
+                                    placeholder: 'flying, water, family...',
+                                    className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
+                                        isDarkMode 
+                                            ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                                            : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500'
+                                    }`
+                                })
+                            ),
+                            
+                            React.createElement('button', {
+                                onClick: addDream,
+                                disabled: isLoading || !newDream.title || !newDream.content,
+                                className: 'w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50'
+                            },
+                                isLoading ? 
+                                    React.createElement('span', { className: 'flex items-center justify-center space-x-2' },
+                                        React.createElement(BrainIcon),
+                                        React.createElement('span', {}, 'Analyzing...')
+                                    ) :
+                                    (isEditing ? 'Update Dream' : 'Save Dream')
+                            )
+                        )
+                    ),
+                    
+                    // Analytics View
+                    currentView === 'analytics' && React.createElement('div', { className: 'space-y-6' },
+                        React.createElement('div', { className: 'flex items-center justify-between mb-6' },
+                            React.createElement('h2', { className: `text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Dream Analytics'),
+                            React.createElement('button', {
+                                onClick: () => setShowWaitlistModal(true),
+                                className: 'waitlist-glow text-white px-4 py-2 rounded-lg hover:scale-105 transition-all'
+                            }, '👑 Join Waitlist for Premium Analytics')
+                        ),
+                        
+                        React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-4' },
+                            React.createElement('div', { className: `p-4 rounded-xl text-center border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
+                                React.createElement('div', { className: 'text-2xl font-bold text-blue-600' }, dreams.length),
+                                React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 'Total Dreams')
+                            ),
+                            React.createElement('div', { className: `p-4 rounded-xl text-center border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
+                                React.createElement('div', { className: 'text-2xl font-bold text-green-600' }, dreams.filter(d => d.lucid).length),
+                                React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 'Lucid Dreams')
+                            ),
+                            React.createElement('div', { className: `p-4 rounded-xl text-center border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
+                                React.createElement('div', { className: 'text-2xl font-bold text-purple-600' }, new Set(dreams.flatMap(d => d.tags || [])).size),
+                                React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 'Themes')
+                            ),
+                            React.createElement('div', { className: `p-4 rounded-xl text-center border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}` },
+                                React.createElement('div', { className: 'text-2xl font-bold text-orange-600' }, dreamStreak),
+                                React.createElement('div', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}` }, 'Day Streak')
+                            )
+                        ),
+                        
+                        React.createElement('div', { className: `border-2 border-dashed rounded-xl p-8 text-center ${isDarkMode ? 'border-purple-600 bg-purple-900/20' : 'border-purple-300 bg-purple-50'}` },
+                            React.createElement('div', { className: 'text-6xl mb-4' }, '👑'),
+                            React.createElement('h3', { className: `text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Premium Analytics Coming Soon!'),
+                            React.createElement('p', { className: `text-lg mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, 
+                                'Advanced emotion charts, dream scoring, pattern recognition & more!'
+                            ),
+                            React.createElement('div', { className: 'flex items-center justify-center space-x-2 mb-6' },
+                                React.createElement(UsersIcon),
+                                React.createElement('span', { className: 'font-bold' }, waitlistCount.toLocaleString()),
+                                React.createElement('span', { className: `${isDarkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'dreamers waiting!')
+                            ),
+                            !isOnWaitlist && React.createElement('button', {
+                                onClick: () => setShowWaitlistModal(true),
+                                className: 'waitlist-glow text-white px-8 py-4 rounded-lg text-lg font-bold hover:scale-105 transition-all'
+                            }, 'Join Waitlist - Be First! 🚀')
+                        )
+                    ),
+                    
+                    // Timeline View
+                    currentView === 'timeline' && React.createElement('div', { className: 'space-y-6' },
+                        React.createElement('h2', { className: `text-xl font-semibold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Dream Timeline'),
+                        
+                        React.createElement('div', { className: `border-2 border-dashed rounded-xl p-8 text-center ${isDarkMode ? 'border-purple-600 bg-purple-900/20' : 'border-purple-300 bg-purple-50'}` },
+                            React.createElement('div', { className: 'text-6xl mb-4' }, '📈'),
+                            React.createElement('h3', { className: `text-xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Advanced Timeline Coming Soon!'),
+                            React.createElement('p', { className: `mb-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, 
+                                'See dream patterns, emotional trends, and progression over time with interactive charts.'
+                            ),
+                            React.createElement('button', {
+                                onClick: () => setShowWaitlistModal(true),
+                                className: 'waitlist-glow text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-all'
+                            }, 'Join Waitlist for Timeline Features')
+                        ),
+                        
+                        dreams.length > 0 && React.createElement('div', { className: 'space-y-4' },
+                            dreams.slice(0, 3).map(dream => 
+                                React.createElement('div', { 
+                                    key: dream.id,
+                                    className: `p-4 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`
+                                },
+                                    React.createElement('h3', { className: `font-medium ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, dream.title),
+                                    React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}` }, dream.date)
+                                )
+                            )
+                        )
+                    )
+                ),
+
+                // Floating Add Button (Mobile)
+                React.createElement('button', {
+                    onClick: () => setCurrentView('add'),
+                    className: 'fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all md:hidden transform hover:scale-110'
+                },
+                    React.createElement(PlusIcon)
+                ),
+
+                // Waitlist Modal
+                showWaitlistModal && React.createElement('div', { className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4' },
+                    React.createElement('div', { className: `rounded-2xl p-8 max-w-md w-full ${isDarkMode ? 'bg-gray-800' : 'bg-white'}` },
+                        React.createElement('div', { className: 'text-center mb-6' },
+                            React.createElement('div', { className: 'waitlist-glow w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl' },
+                                React.createElement(CrownIcon)
+                            ),
+                            React.createElement('h2', { className: `text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, 'Join the Premium Waitlist'),
+                            React.createElement('p', { className: `${isDarkMode ? 'text-gray-300' : 'text-gray-600'}` }, 'Be first to access advanced dream analytics!')
+                        ),
+                        
+                        React.createElement('div', { className: `p-4 rounded-lg mb-6 ${isDarkMode ? 'bg-blue-900/30' : 'bg-blue-50'}` },
+                            React.createElement('h3', { className: `font-semibold mb-3 ${isDarkMode ? 'text-blue-300' : 'text-blue-800'}` }, 'Coming Soon:'),
+                            React.createElement('div', { className: 'space-y-2 text-sm' },
+                                React.createElement('div', { className: `${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` }, '🧠 Advanced AI dream analysis'),
+                                React.createElement('div', { className: `${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` }, '📊 Emotion charts & scoring'),
+                                React.createElement('div', { className: `${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` }, '🎭 Dream archetypes & patterns'),
+                                React.createElement('div', { className: `${isDarkMode ? 'text-blue-200' : 'text-blue-700'}` }, '📈 Timeline & trend analysis')
+                            )
+                        ),
+                        
+                        React.createElement('div', { className: `text-center mb-6 p-3 rounded-lg ${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}` },
+                            React.createElement('div', { className: 'flex items-center justify-center space-x-2 mb-1' },
+                                React.createElement(UsersIcon),
+                                React.createElement('span', { className: `font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}` }, waitlistCount.toLocaleString())
+                            ),
+                            React.createElement('p', { className: `text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'dreamers already waiting!')
+                        ),
+                        
+                        React.createElement('div', { className: 'space-y-4' },
+                            React.createElement('input', {
+                                type: 'email',
+                                placeholder: 'Enter your email',
+                                value: waitlistEmail,
+                                onChange: (e) => setWaitlistEmail(e.target.value),
+                                className: `w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                                    isDarkMode 
+                                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
+                                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                                }`
+                            }),
+                            React.createElement('button', {
+                                onClick: joinWaitlist,
+                                className: 'w-full waitlist-glow text-white py-3 rounded-lg font-semibold transition-all transform hover:scale-105'
+                            }, 'Join Waitlist - Get Notified First! 🚀'),
+                            React.createElement('button', {
+                                onClick: () => setShowWaitlistModal(false),
+                                className: `w-full py-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`
+                            }, 'Maybe Later')
+                        )
+                    )
+                )
+            );
+        }
+
+        ReactDOM.render(React.createElement(DreamJournalApp), document.getElementById('root'));
+    </script>
+    
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>
