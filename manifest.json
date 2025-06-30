@@ -116,7 +116,6 @@
       ]
     }
   ],
-
   "scope_extensions": [
     {"origin": "https://dreamvault-app.vercel.app"}
   ],
