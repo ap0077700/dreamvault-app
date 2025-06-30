@@ -48,25 +48,25 @@
   },
   "icons": [
     {
-      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=192&h=192&fit=crop&crop=center",
+      "src": "https://picsum.photos/192/192?random=1",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=192&h=192&fit=crop&crop=center",
+      "src": "https://picsum.photos/192/192?random=2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=512&h=512&fit=crop&crop=center",
+      "src": "https://picsum.photos/512/512?random=3",
       "sizes": "512x512", 
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=512&h=512&fit=crop&crop=center",
+      "src": "https://picsum.photos/512/512?random=4",
       "sizes": "512x512", 
       "type": "image/png",
       "purpose": "maskable"
@@ -74,14 +74,14 @@
   ],
   "screenshots": [
     {
-      "src": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=390&h=844&fit=crop",
+      "src": "https://picsum.photos/390/844?random=5",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Dream Journal Interface"
     },
     {
-      "src": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1024&h=593&fit=crop",
+      "src": "https://picsum.photos/1024/593?random=6",
       "sizes": "1024x593",
       "type": "image/png", 
       "form_factor": "wide",
@@ -96,7 +96,7 @@
       "url": "/?view=add",
       "icons": [
         {
-          "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=96&h=96&fit=crop&crop=center",
+          "src": "https://picsum.photos/96/96?random=7",
           "sizes": "96x96",
           "type": "image/png"
         }
@@ -109,7 +109,7 @@
       "url": "/?view=analytics",
       "icons": [
         {
-          "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=96&h=96&fit=crop&crop=center",
+          "src": "https://picsum.photos/96/96?random=8",
           "sizes": "96x96",
           "type": "image/png"
         }
@@ -131,7 +131,7 @@
       "type": "application/json",
       "screenshots": [
         {
-          "src": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=280&h=120&fit=crop",
+          "src": "https://picsum.photos/280/120?random=9",
           "sizes": "280x120",
           "label": "Dream streak widget"
         }
