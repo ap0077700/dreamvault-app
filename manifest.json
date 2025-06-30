@@ -5,7 +5,6 @@
   "start_url": "/",
   "id": "dreamvault-app",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#6366f1",
   "theme_color": "#6366f1",
   "orientation": "portrait-primary",
@@ -13,115 +12,60 @@
   "lang": "en",
   "dir": "ltr",
   "categories": ["health", "lifestyle", "productivity"],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "file_handlers": [
-    {
-      "action": "/",
-      "accept": {
-        "text/plain": [".txt"],
-        "application/json": [".json"]
-      }
-    }
-  ],
-  "handle_links": "preferred",
-  "protocol_handlers": [
-    {
-      "protocol": "web+dreamvault",
-      "url": "/?action=%s"
-    }
-  ],
-  "share_target": {
-    "action": "/",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
   "icons": [
     {
-      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=192&h=192&fit=crop&crop=center",
+      "src": "https://via.placeholder.com/192x192/6366f1/ffffff?text=🌙",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=512&h=512&fit=crop&crop=center",
-      "sizes": "512x512", 
+      "src": "https://via.placeholder.com/192x192/6366f1/ffffff?text=🌙",
+      "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/6366f1/ffffff?text=🌙",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/6366f1/ffffff?text=🌙",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=390&h=844&fit=crop",
+      "src": "https://via.placeholder.com/390x844/f8fafc/6366f1?text=DreamVault+Mobile",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Dream Journal Interface"
+      "label": "Dream Journal Mobile Interface"
     },
     {
-      "src": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1024&h=593&fit=crop",
+      "src": "https://via.placeholder.com/1024x593/f8fafc/6366f1?text=DreamVault+Desktop",
       "sizes": "1024x593",
-      "type": "image/png", 
+      "type": "image/png",
       "form_factor": "wide",
-      "label": "Dream Analytics Dashboard"
+      "label": "Dream Analytics Desktop Dashboard"
     }
   ],
   "shortcuts": [
     {
       "name": "Add Dream",
-      "short_name": "Add Dream", 
+      "short_name": "Add Dream",
       "description": "Record a new dream",
       "url": "/?view=add",
       "icons": [
         {
-          "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=96&h=96&fit=crop&crop=center",
+          "src": "https://via.placeholder.com/96x96/6366f1/ffffff?text=+",
           "sizes": "96x96",
           "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "View Analytics",
-      "short_name": "Analytics", 
-      "description": "View dream analytics and insights",
-      "url": "/?view=analytics",
-      "icons": [
-        {
-          "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=96&h=96&fit=crop&crop=center",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
-  "related_applications": [],
-  "scope_extensions": [
-    {"origin": "https://dreamvault-app.vercel.app"}
-  ],
-  "widgets": [
-    {
-      "name": "Dream Streak",
-      "description": "Shows current dream recording streak",
-      "tag": "dream-streak",
-      "template": "dream-streak-template",
-      "ms_ac_template": "adaptive-card.json",
-      "data": "widgets/dream-streak.json",
-      "type": "application/json",
-      "screenshots": [
-        {
-          "src": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=280&h=120&fit=crop",
-          "sizes": "280x120",
-          "label": "Dream streak widget"
         }
       ]
     }
