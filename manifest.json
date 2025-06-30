@@ -51,13 +51,25 @@
       "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=192&h=192&fit=crop&crop=center",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=192&h=192&fit=crop&crop=center",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=512&h=512&fit=crop&crop=center",
       "sizes": "512x512", 
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=512&h=512&fit=crop&crop=center",
+      "sizes": "512x512", 
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "screenshots": [
